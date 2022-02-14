@@ -154,7 +154,7 @@ public class Client {
     }
 
     private String decryptMessage(String message) throws IOException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchPaddingException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException {
-        Path path = Paths.get("/home/el/Personal Projects/Server-Client demo/src/"+userId+"-private.der");
+        Path path = Paths.get("C:\\Users\\gmbug\\OneDrive\\Documents\\GitHub\\Server-Client-Demo\\src\\"+userId+"-private.der");
 
         PrivateKey privateKey;
         byte[] bytes = Files.readAllBytes(path);
@@ -176,7 +176,7 @@ public class Client {
             throws IOException, NoSuchAlgorithmException, InvalidKeySpecException {
         PublicKey publicKey;
 
-        Path path = Paths.get("/home/el/Personal Projects/Server-Client demo/src/"+keyName+"-public.key");
+        Path path = Paths.get("C:\\Users\\gmbug\\OneDrive\\Documents\\GitHub\\Server-Client-Demo\\src\\"+keyName+"-public.key");
         byte[] publicKeyBytes = Files.readAllBytes(path);
 
         X509EncodedKeySpec publicSpec = new X509EncodedKeySpec(publicKeyBytes);
