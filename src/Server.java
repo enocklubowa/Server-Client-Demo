@@ -5,9 +5,10 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+
 public class Server {
     private ServerSocket serverSocket;
-    public static List<Post> posts = new ArrayList<>();
+    public static List<Client.Post> posts = new ArrayList<>();
 
     public void start(int port) throws IOException, ClassNotFoundException {
         //Server socket to serve clients
@@ -71,14 +72,14 @@ public class Server {
 
             //write previous posts
             try {
-                objectOutputStream.writeObject(new Post(posts));
+                objectOutputStream.writeObject(new Client.Post(posts));
             } catch (IOException e) {
                 e.printStackTrace();
             }
 
-            Post post;
+            Client.Post post;
             try{
-                while( (post = (Post)objectInputStream.readObject()) != null){
+                while( (post = (Client.Post)objectInputStream.readObject()) != null){
                     System.out.println(post.getMessage());
                     posts.add(post);
                     objectOutputStream.writeObject(post);
