@@ -8,12 +8,16 @@
  * server to generate new keys.
  */
 
+import javax.crypto.Cipher;
 import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.security.*;
+import java.util.Base64;
 
 public class RSAKeyGen {
 
     public static void main(String [] args) throws Exception {
+
 
         KeyPairGenerator generator = KeyPairGenerator.getInstance("RSA");
         generator.initialize(2048);
@@ -22,16 +26,20 @@ public class RSAKeyGen {
         PrivateKey privateKey = pair.getPrivate();
         PublicKey publicKey = pair.getPublic();
 
-        System.out.println("Public key format "+publicKey.getFormat());
-        System.out.println("Private key format "+privateKey.getFormat());
 
-        try (FileOutputStream fos = new FileOutputStream(args[0]+"-public"+".key")) {
-            fos.write(publicKey.getEncoded());
-        }
+        Base64.Encoder encoder = Base64.getEncoder();
 
-        try (FileOutputStream fos = new FileOutputStream(args[0]+"-private"+".der")) {
-            fos.write(privateKey.getEncoded());
-        }
+        Writer out = new FileWriter(args[0] + ".key");
+        out.write(encoder.encodeToString(privateKey.getEncoded()));
+        out.close();
+
+        out = new FileWriter(args[0] + ".pub");
+        out.write(encoder.encodeToString(publicKey.getEncoded()));
+        out.close();
+
+
+
+
 
         /*
         if (args.length != 1) {
@@ -43,7 +51,7 @@ public class RSAKeyGen {
         kpg.initialize(2048);
         KeyPair kp = kpg.genKeyPair();
 
-        ObjectOutputStream objOut = new ObjectOutputStream(new FileOutputStream(args[0] + ".der"));
+        ObjectOutputStream objOut = new ObjectOutputStream(new FileOutputStream(args[0] + ".pub"));
         objOut.writeObject(kp.getPublic());
         objOut.close();
 
@@ -52,6 +60,8 @@ public class RSAKeyGen {
 
 
          */
+
+
     }
 
 }

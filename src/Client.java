@@ -126,7 +126,7 @@ public class Client {
             InvalidKeyException, NoSuchPaddingException, NoSuchAlgorithmException, IOException, InvalidKeySpecException {
         Cipher cipher = Cipher.getInstance(DEFAULT_TRANSFORMATION);
         cipher.init(Cipher.ENCRYPT_MODE, readPublicKey(keyName));
-        return Base64.getEncoder().encodeToString(cipher.doFinal(data.getBytes()));
+        return new String(cipher.doFinal(data.getBytes()), StandardCharsets.ISO_8859_1);
     }
 
     private void printPreviousPosts() throws IOException, ClassNotFoundException {
@@ -143,32 +143,36 @@ public class Client {
                     message = decryptMessage(p.getMessage());
                 }
                 catch(IllegalArgumentException | IOException | IllegalBlockSizeException | BadPaddingException | InvalidKeyException | NoSuchPaddingException | InvalidKeySpecException | NoSuchAlgorithmException e){
-                    System.out.println("Exception thrown "+" "+ e.getClass().getSimpleName() +e.getMessage());
-                    message = p.getMessage();
+                    if(message.isEmpty()){
+                        message = p.getMessage();
+                    }
+
                 }
 
-                System.out.println("Message: "+p.getMessage());
+                System.out.println("Message: "+message);
             }
         }
 
     }
 
     private String decryptMessage(String message) throws IOException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchPaddingException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException {
-        Path path = Paths.get("/home/el/Personal Projects/Server-Client demo/src/"+userId+"-private.der");
+        Path path = Paths.get("/home/el/Personal Projects/Server-Client demo/src/"+userId+".key");
 
         PrivateKey privateKey;
-        byte[] bytes = Files.readAllBytes(path);
+        byte[] bytes = Base64.getDecoder().decode(Files.readAllBytes(path));
 
         PKCS8EncodedKeySpec keySpec = new PKCS8EncodedKeySpec(bytes);
+
         KeyFactory keyFactory = KeyFactory.getInstance("RSA");
         privateKey = keyFactory.generatePrivate(keySpec);
 
-        Cipher decryptCipher = Cipher.getInstance("RSA/ECB/PKCS1Padding");
+        Cipher decryptCipher = Cipher.getInstance(DEFAULT_TRANSFORMATION);
         decryptCipher.init(Cipher.DECRYPT_MODE, privateKey);
+        decryptCipher.update(message.getBytes(StandardCharsets.ISO_8859_1));
 
-        byte[] decryptedBytes = decryptCipher.doFinal(message.getBytes(StandardCharsets.UTF_8));
+        //System.out.println("Decrypted message is "+new String(decryptCipher.doFinal()));
 
-        return new String(decryptedBytes, StandardCharsets.UTF_8);
+        return new String(decryptCipher.doFinal());
     }
 
     //Reads public key into memory, returns it if already read once.
@@ -176,8 +180,8 @@ public class Client {
             throws IOException, NoSuchAlgorithmException, InvalidKeySpecException {
         PublicKey publicKey;
 
-        Path path = Paths.get("/home/el/Personal Projects/Server-Client demo/src/"+keyName+"-public.key");
-        byte[] publicKeyBytes = Files.readAllBytes(path);
+        Path path = Paths.get("/home/el/Personal Projects/Server-Client demo/src/"+keyName+".pub");
+        byte[] publicKeyBytes = Base64.getDecoder().decode(Files.readAllBytes(path));
 
         X509EncodedKeySpec publicSpec = new X509EncodedKeySpec(publicKeyBytes);
         KeyFactory keyFactory = KeyFactory.getInstance("RSA");
