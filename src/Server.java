@@ -1,6 +1,9 @@
 import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.nio.charset.StandardCharsets;
+import java.security.PublicKey;
+import java.security.Signature;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -78,11 +81,25 @@ public class Server {
             }
 
             Client.Post post;
+            byte[] signature;
             try{
                 while( (post = (Client.Post)objectInputStream.readObject()) != null){
-                    System.out.println(post.getMessage());
-                    posts.add(post);
-                    objectOutputStream.writeObject(post);
+                    if(verify(post.toString().getBytes(StandardCharsets.ISO_8859_1),
+                            post.getSignature().getBytes(StandardCharsets.ISO_8859_1),
+                            post.getSenderId())){
+                        System.out.println("Sender Verified");
+
+                        System.out.println(post.getMessage());
+                        posts.add(post);
+                        objectOutputStream.writeObject(post);
+
+                    }
+                    else{
+                        System.out.println("Sender Not Verified");
+                    }
+
+
+
                 }
 
                 inputStream.close();
@@ -94,5 +111,28 @@ public class Server {
             }
 
         }
+
+
+    }
+
+    private static Boolean verify(byte[] plainText, byte[] signature, String keyName) {
+
+        System.out.println("Username used for verification: "+keyName);
+        byte[] signatureBytes = null;
+        Signature verifier = null;
+        boolean verified = false;
+        try {
+
+            PublicKey pubKey = Client.readPublicKey(keyName);
+            verifier = Signature.getInstance("SHA256withRSA");
+            verifier.initVerify(pubKey);
+            verifier.update(plainText);
+
+            signatureBytes = signature;
+            verified = verifier.verify(signatureBytes);
+        } catch (Exception e) {
+            System.out.println("Error in verify");
+        }
+        return verified;
     }
 }

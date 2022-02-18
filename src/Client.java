@@ -42,7 +42,9 @@ public class Client {
 
     public void sendMessage(String senderId, String message) throws IOException, ClassNotFoundException {
         Post post = new Post(senderId, new Date(), message);
+        post.setSignature(new String(sign(post, userId), StandardCharsets.ISO_8859_1));
         objectOutputStream.writeObject(post);
+        //objectOutputStream.writeObject();
 
         try{
             post = (Post)objectInputStream.readObject();
@@ -58,6 +60,45 @@ public class Client {
 
 
     }
+
+    //Combines plaintext with senders private key to create a signature which can be verified using the senders public key.
+    public static byte[] sign(Post post, String keyName) {
+        byte[] sign = null;
+        byte[] postBytes = (post.toString()).getBytes(StandardCharsets.ISO_8859_1);
+        try {
+
+            PrivateKey privKey = readPrivateKey(keyName);
+            Signature signer = Signature.getInstance("SHA256withRSA");
+            signer.initSign(privKey);
+            signer.update(postBytes);
+
+            sign = signer.sign();
+
+        } catch (Exception e) {
+            System.out.println("Error in signing");
+        }
+
+
+
+        return sign;
+    }
+
+    private static PrivateKey readPrivateKey(String keyName) throws IOException, NoSuchAlgorithmException, InvalidKeySpecException {
+
+        Path path = Paths.get(keyName+".key");
+
+        PrivateKey privateKey;
+        byte[] bytes = Base64.getDecoder().decode(Files.readAllBytes(path));
+
+        PKCS8EncodedKeySpec keySpec = new PKCS8EncodedKeySpec(bytes);
+
+        KeyFactory keyFactory = KeyFactory.getInstance("RSA");
+        privateKey = keyFactory.generatePrivate(keySpec);
+
+        return privateKey;
+    }
+
+
 
     public void stopConnection() throws IOException {
         inputStream.close();
@@ -140,7 +181,7 @@ public class Client {
                 System.out.println("Date: "+p.getTime());
                 String message = p.getMessage();
                 try{
-                    message = decryptMessage(p.getMessage());
+                    message = decryptMessage(p.getMessage(), userId);
                 }
                 catch(IllegalArgumentException | IOException | IllegalBlockSizeException | BadPaddingException | InvalidKeyException | NoSuchPaddingException | InvalidKeySpecException | NoSuchAlgorithmException e){
                     if(message.isEmpty()){
@@ -155,19 +196,10 @@ public class Client {
 
     }
 
-    private String decryptMessage(String message) throws IOException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchPaddingException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException {
-        Path path = Paths.get("C:\\Users\\gmbug\\OneDrive\\Documents\\GitHub\\Server-Client-Demo\\src\\"+userId+".key");
-
-        PrivateKey privateKey;
-        byte[] bytes = Base64.getDecoder().decode(Files.readAllBytes(path));
-
-        PKCS8EncodedKeySpec keySpec = new PKCS8EncodedKeySpec(bytes);
-
-        KeyFactory keyFactory = KeyFactory.getInstance("RSA");
-        privateKey = keyFactory.generatePrivate(keySpec);
+    private String decryptMessage(String message, String keyName) throws IOException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchPaddingException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException {
 
         Cipher decryptCipher = Cipher.getInstance(DEFAULT_TRANSFORMATION);
-        decryptCipher.init(Cipher.DECRYPT_MODE, privateKey);
+        decryptCipher.init(Cipher.DECRYPT_MODE, readPrivateKey(keyName));
         decryptCipher.update(message.getBytes(StandardCharsets.ISO_8859_1));
 
         //System.out.println("Decrypted message is "+new String(decryptCipher.doFinal()));
@@ -176,11 +208,11 @@ public class Client {
     }
 
     //Reads public key into memory, returns it if already read once.
-    private static PublicKey readPublicKey(String keyName)
+    public static PublicKey readPublicKey(String keyName)
             throws IOException, NoSuchAlgorithmException, InvalidKeySpecException {
         PublicKey publicKey;
 
-        Path path = Paths.get("C:\\Users\\gmbug\\OneDrive\\Documents\\GitHub\\Server-Client-Demo\\src\\"+keyName+".pub");
+        Path path = Paths.get(keyName+".pub");
         byte[] publicKeyBytes = Base64.getDecoder().decode(Files.readAllBytes(path));
 
         X509EncodedKeySpec publicSpec = new X509EncodedKeySpec(publicKeyBytes);
@@ -196,6 +228,7 @@ public class Client {
         private Date time;
         private String message;
         private List<Post> posts;
+        private String signature;
 
         public Post() {
         }
@@ -241,6 +274,25 @@ public class Client {
         public void setPosts(List<Post> posts) {
             this.posts = posts;
         }
+
+        public void setSignature(String signature) {
+            this.signature = signature;
+        }
+
+        public String getSignature() {
+            return signature;
+        }
+
+        @Override
+        public String toString() {
+            return "Post{" +
+                    "senderId='" + senderId + '\'' +
+                    ", time=" + time +
+                    ", message='" + message + '\'' +
+                    ", posts=" + posts +
+                    '}';
+        }
     }
 
 }
+
