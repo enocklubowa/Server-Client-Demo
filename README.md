@@ -118,21 +118,35 @@ signature are then sent to the server.
 
 An example of the client program output may look like this (you do not have to follow the format
 exactly):
+
 There are 2 post(s).
+
 Sender: alice
+
 Date: Wed Jan 26 00:32:19 GMT 2022
+
 Message:
+
 ZpUFbCw3MlnqOzLmTxq2orlhbHxAMVlIzAXHyz3kiuhTzH9xW/RJ6gzCVwkhKA61yx2Uzte/Cvw
 Dn8QdaF0WMB9jUtXo1hShp0lFA+tTohPtJxmeELtZEwasM8u0T6YQGP9PhpetgGm9zCnSxfC2
 KLV5iXgBr0yOtsmxq+InUqfWH6GNdfaMr+0RTdqS44v00lz3Eonzj4v0jno+eYjGYsdo1cqKk/bA3I
 Zsu8K1kLNZnKdH2W6NomV7uKm5tvzHpWCJkNdyKU4W5mT6NFEj2kFcJ4FKOIQRU7x52Job
 1S13/Vc7zbc8dG82FFvWZ8xgBD2kbE4gHh32lJ47nkFl6A==
+
 Sender: bob
+
 Date: Wed Jan 26 00:34:49 GMT 2022
+
 Message: The cake is a lie
+
 Do you want to add a post? [y/n]
+
 y
+
 Enter the recipient userid (type "all" for posting without encryption):
+
 alice
+
 Enter your message:
+
 Hey alice why are you sending some secret message to someone?
