@@ -154,7 +154,11 @@ public class Client {
     }
 
     private String decryptMessage(String message) throws IOException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchPaddingException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException {
+<<<<<<< Updated upstream
         Path path = Paths.get("C:\\Users\\gmbug\\OneDrive\\Documents\\GitHub\\Server-Client-Demo\\src\\"+userId+"-private.der");
+=======
+        Path path = Paths.get("C:\\Users\\gmbug\\OneDrive\\Documents\\GitHub\\Server-Client-Demo\\src\\"+userId+".key");
+>>>>>>> Stashed changes
 
         PrivateKey privateKey;
         byte[] bytes = Files.readAllBytes(path);
@@ -176,8 +180,13 @@ public class Client {
             throws IOException, NoSuchAlgorithmException, InvalidKeySpecException {
         PublicKey publicKey;
 
+<<<<<<< Updated upstream
         Path path = Paths.get("C:\\Users\\gmbug\\OneDrive\\Documents\\GitHub\\Server-Client-Demo\\src\\"+keyName+"-public.key");
         byte[] publicKeyBytes = Files.readAllBytes(path);
+=======
+        Path path = Paths.get("C:\\Users\\gmbug\\OneDrive\\Documents\\GitHub\\Server-Client-Demo\\src\\"+keyName+".pub");
+        byte[] publicKeyBytes = Base64.getDecoder().decode(Files.readAllBytes(path));
+>>>>>>> Stashed changes
 
         X509EncodedKeySpec publicSpec = new X509EncodedKeySpec(publicKeyBytes);
         KeyFactory keyFactory = KeyFactory.getInstance("RSA");
