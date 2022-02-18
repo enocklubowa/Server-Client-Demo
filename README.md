@@ -116,7 +116,7 @@ or not), using the appropriate key to prove the identity of the sender. The post
 signature are then sent to the server.
 
 
-An example of the client program output may look like this (you do not have to follow the format
+##### An example of the client program output may look like this (you do not have to follow the format
 exactly):
 
 There are 2 post(s).
